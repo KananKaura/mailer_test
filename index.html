@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gmail Mailer Local</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; }
+    form { display:flex; flex-direction:column; max-width:400px; }
+    input, textarea, button { margin:5px 0; padding:10px; font-size:14px; }
+    button { background:#007bff; color:white; border:none; cursor:pointer; }
+    button:disabled { opacity:0.6; }
+    p#status { font-size:14px; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <h2>Send Test Email (Local)</h2>
+  <form id="mailForm">
+    <input type="email" name="to" placeholder="Recipient Email" required>
+    <input type="text" name="subject" placeholder="Subject (optional)">
+    <textarea name="message" placeholder="Message" rows="5" required></textarea>
+    <button type="submit">Send</button>
+    <p id="status"></p>
+  </form>
+
+  <script>
+    const form = document.getElementById('mailForm');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      status.textContent = 'Sending...';
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const res = await fetch('/sendMail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        status.textContent = result.success ? '✅ Mail sent!' : '❌ ' + result.msg;
+        if(result.success) form.reset();
+      } catch(err) {
+        status.textContent = '❌ Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
